@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { ArrowLeft, HandHeart, Package, Search, Wrench } from "lucide-react";
 
-import { Field, Input, Label, Select, Textarea } from "@/components/ui/field";
+import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { FormError, SubmitButton } from "@/components/form-parts";
 import { createListingAction } from "@/server/listing-actions";
 import { cn } from "@/lib/utils";

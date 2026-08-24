@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import bcrypt from "bcryptjs";

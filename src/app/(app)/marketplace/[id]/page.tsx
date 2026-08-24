@@ -15,7 +15,6 @@ import { distanceKm, formatDistance } from "@/lib/geo";
 import { formatPoints } from "@/lib/format";
 import { CATEGORY_EMOJI } from "@/lib/categories";
 import { Avatar } from "@/components/ui/avatar";
-import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Pill } from "@/components/ui/pill";
 import { Stars } from "@/components/ui/stars";

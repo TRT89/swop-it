@@ -3,7 +3,7 @@ import { Bell, Home, MessageCircle, Plus, Search, User } from "lucide-react";
 import type { CurrentUser } from "@/lib/auth";
 import { Logo } from "@/components/ui/logo";
 import { ButtonLink } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
+import { AccountMenu } from "@/components/account-menu";
 import { NavLink, MobileNavLink } from "@/components/nav-link";
 
 export function AppShell({
@@ -29,6 +29,7 @@ export function AppShell({
               <>
                 <NavLink href="/swaps">My Swops</NavLink>
                 <NavLink href="/wallet">Wallet</NavLink>
+                {user.role === "ADMIN" ? <NavLink href="/admin">Admin</NavLink> : null}
               </>
             ) : null}
           </nav>
@@ -51,13 +52,12 @@ export function AppShell({
                 <IconLink href="/notifications" label="Notifications" badge={unreadNotifications}>
                   <Bell size={20} />
                 </IconLink>
-                <Link
-                  href={`/profile/${user.id}`}
-                  className="ml-1 rounded-full transition-opacity hover:opacity-80"
-                  aria-label="Your profile"
-                >
-                  <Avatar name={user.displayName} src={user.avatarUrl} size="sm" />
-                </Link>
+                <AccountMenu
+                  userId={user.id}
+                  displayName={user.displayName}
+                  avatarUrl={user.avatarUrl}
+                  isAdmin={user.role === "ADMIN"}
+                />
               </>
             ) : (
               <>
@@ -73,9 +73,18 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-5 sm:px-5 sm:pb-16">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 pt-5 sm:px-5">
         {children}
       </main>
+
+      <footer className="mx-auto mb-24 mt-10 w-full max-w-6xl px-4 sm:mb-8 sm:px-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-sand-200 pt-6 text-sm text-ink-400">
+          <p>A prototype. Social Points have no monetary value.</p>
+          <Link href="/feedback" className="font-medium text-moss-700 hover:underline">
+            Give feedback
+          </Link>
+        </div>
+      </footer>
 
       {user ? (
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-sand-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
