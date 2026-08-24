@@ -26,7 +26,9 @@ export function distanceKm(a: Point, b: Point): number | null {
 
 export function formatDistance(km: number | null): string | null {
   if (km == null) return null;
-  if (km < 1) return `${Math.round(km * 10) * 100} m away`;
+  // Seeded and self-reported locations sit on city centroids, so anything
+  // inside a kilometre is reported as "very close" rather than a fake precision.
+  if (km < 1) return "Less than 1 km away";
   return `${km.toFixed(1)} km away`;
 }
 

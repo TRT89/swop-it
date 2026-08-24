@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Field, Input } from "@/components/ui/field";
-import { FormError, SubmitButton } from "../form-parts";
+import { FormError, SubmitButton } from "@/components/form-parts";
 import { signupAction } from "../actions";
 
 export function SignupForm() {
@@ -47,7 +47,7 @@ export function SignupForm() {
         Only your city is shown to other members — never your exact address.
       </p>
       <FormError message={state?.error} />
-      <SubmitButton label="Create my account" />
+      <SubmitButton label="Create my account" size="lg" />
     </form>
   );
 }

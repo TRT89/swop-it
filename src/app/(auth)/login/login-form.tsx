@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Field, Input } from "@/components/ui/field";
-import { FormError, SubmitButton } from "../form-parts";
+import { FormError, SubmitButton } from "@/components/form-parts";
 import { loginAction } from "../actions";
 
 export function LoginForm() {
@@ -31,7 +31,7 @@ export function LoginForm() {
         />
       </Field>
       <FormError message={state?.error} />
-      <SubmitButton label="Log in" />
+      <SubmitButton label="Log in" size="lg" />
     </form>
   );
 }
