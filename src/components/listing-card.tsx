@@ -5,7 +5,7 @@ import { formatDistance } from "@/lib/geo";
 import { formatPoints } from "@/lib/format";
 import { Avatar } from "@/components/ui/avatar";
 import { Pill } from "@/components/ui/pill";
-import { Stars } from "@/components/ui/stars";
+import { StarValue } from "@/components/ui/stars";
 import { ListingCover } from "@/components/listing-cover";
 
 export function ListingCard({ listing }: { listing: ListingCardData }) {
@@ -54,12 +54,10 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
 
         <div className="mt-auto flex items-center gap-2 pt-3">
           <Avatar name={listing.ownerName} src={listing.ownerAvatar} size="xs" />
-          <span className="truncate text-xs font-medium text-ink-700">
+          <span className="min-w-0 flex-1 truncate text-xs font-medium text-ink-700">
             {listing.ownerName}
           </span>
-          {listing.ownerRating != null ? (
-            <Stars rating={listing.ownerRating} size={11} className="ml-auto text-xs" />
-          ) : null}
+          <StarValue rating={listing.ownerRating} className="shrink-0" />
         </div>
       </div>
     </Link>

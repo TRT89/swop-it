@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
 import * as schema from "./schema";
+import { reportDatabaseUnavailable } from "./exclusive";
 import { PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from "../lib/categories";
 import { BADGE_DEFINITIONS } from "../lib/badges";
 
@@ -416,7 +417,4 @@ async function main() {
   await client.close();
 }
 
-main().catch((err) => {
-  console.error("✗ Seed failed:", err);
-  process.exit(1);
-});
+main().catch((error) => reportDatabaseUnavailable(error, "load the demo data"));

@@ -79,6 +79,19 @@ npm run db:reset
 
 That deletes the local database and rebuilds it from scratch.
 
+### If a database command says it cannot open the database
+
+The embedded database allows one writer at a time. Two things cause this:
+
+1. **The dev server is still running** — it holds the database open. Stop it
+   with Ctrl-C and run the command again.
+2. **The dev server was killed hard** (not Ctrl-C) and left the database
+   mid-write. Run `npm run db:reset` to rebuild it. Nothing is lost that
+   `npm run db:seed` does not put back.
+
+The commands print both of these when they fail, so you do not have to remember
+them.
+
 ---
 
 ## Demo accounts

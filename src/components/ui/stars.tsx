@@ -1,6 +1,26 @@
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Compact rating for tight spaces: one star and the number. */
+export function StarValue({
+  rating,
+  className,
+}: {
+  rating: number | null;
+  className?: string;
+}) {
+  if (rating == null) return null;
+  return (
+    <span
+      className={cn("inline-flex items-center gap-0.5 text-xs text-ink-600", className)}
+    >
+      <Star size={11} className="fill-amber-400 text-amber-400" aria-hidden />
+      <span className="font-medium">{rating.toFixed(1)}</span>
+      <span className="sr-only">out of 5</span>
+    </span>
+  );
+}
+
 export function Stars({
   rating,
   count,
