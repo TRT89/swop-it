@@ -1,5 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
+import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
+import { Pool } from "pg";
+import { drizzle as drizzleNodePg } from "drizzle-orm/node-postgres";
 import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
 import * as schema from "./schema";
@@ -7,6 +9,7 @@ import { reportDatabaseUnavailable } from "./exclusive";
 import { PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from "../lib/categories";
 import { BADGE_DEFINITIONS } from "../lib/badges";
 
+const DATABASE_URL = process.env.DATABASE_URL;
 const DATA_DIR = process.env.SWOPIT_DATA_DIR ?? "./.swopit-data";
 const PASSWORD = "swopit123";
 const WELCOME_BONUS = 50;
@@ -26,8 +29,15 @@ const daysAgo = (n: number) => new Date(Date.now() - n * 864e5);
 const hoursAgo = (n: number) => new Date(Date.now() - n * 36e5);
 
 async function main() {
-  const client = new PGlite(DATA_DIR);
-  const db = drizzle(client, { schema, casing: "snake_case" });
+  const { db, close } = DATABASE_URL
+    ? (() => {
+        const pool = new Pool({ connectionString: DATABASE_URL });
+        return { db: drizzleNodePg(pool, { schema, casing: "snake_case" }), close: () => pool.end() };
+      })()
+    : (() => {
+        const client = new PGlite(DATA_DIR);
+        return { db: drizzlePglite(client, { schema, casing: "snake_case" }), close: () => client.close() };
+      })();
 
   console.log("→ Clearing existing data…");
   await db.execute(sql`
@@ -63,13 +73,13 @@ async function main() {
   const passwordHash = await bcrypt.hash(PASSWORD, 10);
 
   const people = [
-    { key: "tobias", email: "demo@swop-it.local", displayName: "Tobias Lang", place: PLACES.frankfurt, joined: daysAgo(210), bio: "Frankfurt DIY nerd. My garage is basically a tool library — borrow away.", role: "MEMBER" as const },
+    { key: "tobias", email: "demo@swop-it.local", displayName: "Tobias Theis", place: PLACES.frankfurt, joined: daysAgo(210), bio: "Frankfurt DIY nerd. My garage is basically a tool library — borrow away.", role: "MEMBER" as const },
     { key: "anna", email: "anna@swop-it.local", displayName: "Anna Weber", place: PLACES.offenbach, joined: daysAgo(180), bio: "Teacher, dog person, terrible at assembling furniture.", role: "MEMBER" as const },
     { key: "mark", email: "mark@swop-it.local", displayName: "Mark Fischer", place: PLACES.bornheim, joined: daysAgo(150), bio: "Carpenter by trade. Happy to help with anything that involves a screwdriver.", role: "MEMBER" as const },
     { key: "lena", email: "lena@swop-it.local", displayName: "Lena Schulz", place: PLACES.mainz, joined: daysAgo(120), bio: "Photographer. Camping in summer, baking in winter.", role: "MEMBER" as const },
     { key: "jonas", email: "jonas@swop-it.local", displayName: "Jonas Becker", place: PLACES.wiesbaden, joined: daysAgo(95), bio: "IT support for friends and family since 2004. Now for the neighbourhood too.", role: "MEMBER" as const },
     { key: "sofia", email: "sofia@swop-it.local", displayName: "Sofia Ricci", place: PLACES.sachsenhausen, joined: daysAgo(70), bio: "From Bologna. I cook, I garden, I talk a lot of Italian.", role: "MEMBER" as const },
-    { key: "david", email: "david@swop-it.local", displayName: "David Klein", place: PLACES.offenbach, joined: daysAgo(45), bio: "Cyclist with a van and a trailer. Moving day? Call me.", role: "MEMBER" as const },
+    { key: "david", email: "david@swop-it.local", displayName: "Colin Richter", place: PLACES.offenbach, joined: daysAgo(45), bio: "Cyclist with a van and a trailer. Moving day? Call me.", role: "MEMBER" as const },
     { key: "mira", email: "mira@swop-it.local", displayName: "Mira Yilmaz", place: PLACES.badhomburg, joined: daysAgo(30), bio: "Student, part-time tutor, full-time plant collector.", role: "MEMBER" as const },
     { key: "admin", email: "admin@swop-it.local", displayName: "Swop-it Admin", place: PLACES.frankfurt, joined: daysAgo(240), bio: "Keeping the community friendly.", role: "ADMIN" as const },
   ];
@@ -362,9 +372,9 @@ async function main() {
   await db.insert(schema.notifications).values([
     { userId: id.tobias!, type: "MESSAGE", title: "Anna Weber sent you a message", body: "Perfect, I'll be there around 11. Thank you!", link: `/messages/${convWasher.id}`, createdAt: hoursAgo(27) },
     { userId: id.tobias!, type: "SWAP_COMPLETION_REQUESTED", title: "Mark Fischer marked a Swop as done", body: "Need help assembling a wardrobe — confirm to release 20 SP.", link: "/swaps", createdAt: daysAgo(1) },
-    { userId: id.tobias!, type: "POINTS_RECEIVED", title: "You earned 20 SP", body: "CV & Application Review with David Klein.", link: "/wallet", readAt: daysAgo(3), createdAt: daysAgo(4) },
-    { userId: id.lena!, type: "SWAP_REQUESTED", title: "David Klein wants to Swop", body: "Full-HD Beamer + Screen — 18 SP", link: "/swaps", createdAt: hoursAgo(4) },
-    { userId: id.anna!, type: "SWAP_ACCEPTED", title: "Tobias Lang accepted your request", body: "Bosch Pressure Washer — 15 SP", link: "/swaps", createdAt: hoursAgo(26) },
+    { userId: id.tobias!, type: "POINTS_RECEIVED", title: "You earned 20 SP", body: "CV & Application Review with Colin Richter.", link: "/wallet", readAt: daysAgo(3), createdAt: daysAgo(4) },
+    { userId: id.lena!, type: "SWAP_REQUESTED", title: "Colin Richter wants to Swop", body: "Full-HD Beamer + Screen — 18 SP", link: "/swaps", createdAt: hoursAgo(4) },
+    { userId: id.anna!, type: "SWAP_ACCEPTED", title: "Tobias Theis accepted your request", body: "Bosch Pressure Washer — 15 SP", link: "/swaps", createdAt: hoursAgo(26) },
   ]);
 
   /* ------------------------------------------------------- feedback */
@@ -414,7 +424,7 @@ async function main() {
   console.log("  anna@swop-it.local   (Anna)");
   console.log("  admin@swop-it.local  (admin dashboard)");
 
-  await client.close();
+  await close();
 }
 
 main().catch((error) => reportDatabaseUnavailable(error, "load the demo data"));
