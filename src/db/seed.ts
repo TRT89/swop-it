@@ -79,7 +79,7 @@ export async function main() {
     { key: "lena", email: "lena@swop-it.local", displayName: "Lena Schulz", place: PLACES.mainz, joined: daysAgo(120), bio: "Photographer. Camping in summer, baking in winter.", role: "MEMBER" as const },
     { key: "jonas", email: "jonas@swop-it.local", displayName: "Jonas Becker", place: PLACES.wiesbaden, joined: daysAgo(95), bio: "IT support for friends and family since 2004. Now for the neighbourhood too.", role: "MEMBER" as const },
     { key: "sofia", email: "sofia@swop-it.local", displayName: "Sofia Ricci", place: PLACES.sachsenhausen, joined: daysAgo(70), bio: "From Bologna. I cook, I garden, I talk a lot of Italian.", role: "MEMBER" as const },
-    { key: "david", email: "david@swop-it.local", displayName: "Colin Richter", place: PLACES.offenbach, joined: daysAgo(45), bio: "Cyclist with a van and a trailer. Moving day? Call me.", role: "MEMBER" as const },
+    { key: "david", email: "colin@swop-it.local", displayName: "Colin Richter", place: PLACES.offenbach, joined: daysAgo(45), bio: "Cyclist with a van and a trailer. Moving day? Call me.", role: "MEMBER" as const },
     { key: "mira", email: "mira@swop-it.local", displayName: "Mira Yilmaz", place: PLACES.badhomburg, joined: daysAgo(30), bio: "Student, part-time tutor, full-time plant collector.", role: "MEMBER" as const },
     { key: "admin", email: "admin@swop-it.local", displayName: "Swop-it Admin", place: PLACES.frankfurt, joined: daysAgo(240), bio: "Keeping the community friendly.", role: "ADMIN" as const },
   ];
