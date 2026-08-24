@@ -28,7 +28,7 @@ const PLACES = {
 const daysAgo = (n: number) => new Date(Date.now() - n * 864e5);
 const hoursAgo = (n: number) => new Date(Date.now() - n * 36e5);
 
-async function main() {
+export async function main() {
   const { db, close } = DATABASE_URL
     ? (() => {
         const pool = new Pool({ connectionString: DATABASE_URL });
@@ -427,4 +427,6 @@ async function main() {
   await close();
 }
 
-main().catch((error) => reportDatabaseUnavailable(error, "load the demo data"));
+if (process.argv[1] && process.argv[1].endsWith("seed.ts")) {
+  main().catch((error) => reportDatabaseUnavailable(error, "load the demo data"));
+}
