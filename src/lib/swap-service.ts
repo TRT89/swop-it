@@ -27,6 +27,11 @@ async function loadSwapContext(swapId: string) {
   return row ?? null;
 }
 
+/**
+ * Always resolve names *before* opening a transaction. The embedded database
+ * serves a single connection, so a query issued outside an open transaction
+ * queues behind it and deadlocks.
+ */
 async function displayName(userId: string) {
   const [row] = await db
     .select({ name: profiles.displayName })
@@ -90,6 +95,8 @@ export async function requestSwap(args: {
     listing.id,
   );
 
+  const actorName = await displayName(args.actorId);
+
   const swapId = await db.transaction(async (tx) => {
     const [swap] = await tx
       .insert(swaps)
@@ -109,7 +116,7 @@ export async function requestSwap(args: {
       {
         userId: listing.ownerId,
         type: "SWAP_REQUESTED",
-        title: `${await displayName(args.actorId)} wants to Swop`,
+        title: `${actorName} wants to Swop`,
         body: `${listing.title} — ${listing.pricePoints} SP`,
         link: `/swaps/${swap!.id}`,
       },
@@ -141,6 +148,7 @@ export async function respondToSwap(args: {
   }
 
   const otherId = swap.providerId === args.actorId ? swap.requesterId : swap.providerId;
+  const actorName = await displayName(args.actorId);
 
   await db.transaction(async (tx) => {
     await tx
@@ -157,8 +165,8 @@ export async function respondToSwap(args: {
         type: args.decision === "ACCEPTED" ? "SWAP_ACCEPTED" : "SWAP_DECLINED",
         title:
           args.decision === "ACCEPTED"
-            ? `${await displayName(args.actorId)} accepted your request`
-            : `${await displayName(args.actorId)} declined your request`,
+            ? `${actorName} accepted your request`
+            : `${actorName} declined your request`,
         body: `${listing.title} — ${swap.points} SP`,
         link: `/swaps/${swap.id}`,
       },
@@ -217,6 +225,7 @@ export async function confirmCompletion(args: { actorId: string; swapId: string 
   }
 
   const otherId = role === "provider" ? swap.requesterId : swap.providerId;
+  const actorName = await displayName(args.actorId);
   const now = new Date();
 
   const settled = await db.transaction(async (tx) => {
@@ -229,8 +238,8 @@ export async function confirmCompletion(args: { actorId: string; swapId: string 
     const current = locked.rows[0] as
       | {
           status: string;
-          provider_confirmed_at: Date | null;
-          requester_confirmed_at: Date | null;
+          provider_confirmed_at: string | Date | null;
+          requester_confirmed_at: string | Date | null;
         }
       | undefined;
 
@@ -238,10 +247,15 @@ export async function confirmCompletion(args: { actorId: string; swapId: string 
       throw new SwapError("This Swop is already complete.");
     }
 
+    // The raw row comes back from the driver untyped, so normalise before it
+    // goes back into a typed update.
+    const asDate = (value: string | Date | null) =>
+      value == null ? null : value instanceof Date ? value : new Date(value);
+
     const providerConfirmed =
-      role === "provider" ? now : current.provider_confirmed_at;
+      role === "provider" ? now : asDate(current.provider_confirmed_at);
     const requesterConfirmed =
-      role === "requester" ? now : current.requester_confirmed_at;
+      role === "requester" ? now : asDate(current.requester_confirmed_at);
     const bothConfirmed = Boolean(providerConfirmed && requesterConfirmed);
 
     await tx
@@ -259,7 +273,7 @@ export async function confirmCompletion(args: { actorId: string; swapId: string 
         {
           userId: otherId,
           type: "SWAP_COMPLETION_REQUESTED",
-          title: `${await displayName(args.actorId)} marked a Swop as done`,
+          title: `${actorName} marked a Swop as done`,
           body: `${listing.title} — confirm to release ${swap.points} SP.`,
           link: `/swaps/${swap.id}`,
         },
@@ -317,6 +331,7 @@ export async function cancelSwap(args: { actorId: string; swapId: string }) {
   }
 
   const otherId = swap.providerId === args.actorId ? swap.requesterId : swap.providerId;
+  const actorName = await displayName(args.actorId);
 
   await db.transaction(async (tx) => {
     const result = await tx
@@ -331,7 +346,7 @@ export async function cancelSwap(args: { actorId: string; swapId: string }) {
       {
         userId: otherId,
         type: "SWAP_CANCELLED",
-        title: `${await displayName(args.actorId)} cancelled a Swop`,
+        title: `${actorName} cancelled a Swop`,
         body: listing.title,
         link: `/swaps/${swap.id}`,
       },

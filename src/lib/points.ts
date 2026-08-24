@@ -6,8 +6,12 @@ export const WELCOME_BONUS = 50;
 
 export class PointsError extends Error {}
 
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
-type Executor = Tx | typeof db;
+/**
+ * A ledger write always needs a transaction handle, never the top-level `db`.
+ * The two statements below must succeed or fail together: without that, a
+ * rejected balance update would leave an orphaned ledger row behind.
+ */
+export type LedgerTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 type LedgerEntry = {
   userId: string;
@@ -25,7 +29,7 @@ type LedgerEntry = {
  * constraint on wallets.balance rejects anything that would go below zero, so a
  * user can never spend points they do not have.
  */
-export async function postLedgerEntry(tx: Executor, entry: LedgerEntry) {
+export async function postLedgerEntry(tx: LedgerTx, entry: LedgerEntry) {
   if (!Number.isInteger(entry.amount) || entry.amount === 0) {
     throw new PointsError("Ledger amount must be a non-zero integer");
   }
@@ -54,7 +58,7 @@ export async function postLedgerEntry(tx: Executor, entry: LedgerEntry) {
  * swap raises instead of paying out twice.
  */
 export async function settleSwap(
-  tx: Executor,
+  tx: LedgerTx,
   args: {
     swapId: string;
     providerId: string;
@@ -81,6 +85,11 @@ export async function settleSwap(
     amount: args.points,
     description: args.listingTitle,
   });
+}
+
+/** Posts a single stand-alone entry (welcome bonus, admin adjustment, bonus). */
+export async function creditPoints(entry: LedgerEntry) {
+  return db.transaction((tx) => postLedgerEntry(tx, entry));
 }
 
 export async function getBalance(userId: string): Promise<number> {

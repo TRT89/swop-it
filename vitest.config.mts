@@ -1,0 +1,23 @@
+import { defineConfig } from "vitest/config";
+import { fileURLToPath } from "node:url";
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // The `server-only` guard throws outside a React Server Component, so the
+      // domain modules get a no-op stub when they are tested directly.
+      "server-only": fileURLToPath(
+        new URL("./tests/server-only-stub.ts", import.meta.url),
+      ),
+    },
+  },
+  test: {
+    environment: "node",
+    include: ["tests/**/*.test.ts"],
+    setupFiles: ["tests/setup.ts"],
+    fileParallelism: false,
+    testTimeout: 30_000,
+    hookTimeout: 60_000,
+  },
+});
