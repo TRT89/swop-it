@@ -64,7 +64,12 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3100>.
+
+Swop-it runs on **port 3100**, not the usual 3000, so it can sit alongside
+another local project without a collision. To use a different port, change the
+`-p` flag in the `dev` script in `package.json`, or run
+`npx next dev -p 4000` directly.
 
 `npm run dev` creates the database, applies the schema and loads the demo data
 before starting the server, so the marketplace is full of listings the first
@@ -367,7 +372,7 @@ which is already gitignored.
 
 | Command              | What it does                                                   |
 | -------------------- | -------------------------------------------------------------- |
-| `npm run dev`        | Migrate, seed, then start the dev server on port 3000          |
+| `npm run dev`        | Migrate, seed, then start the dev server on port 3100          |
 | `npm run dev:only`   | Start the dev server without touching the database             |
 | `npm run build`      | Production build                                               |
 | `npm start`          | Run the production build                                       |
@@ -446,6 +451,14 @@ fixed; the commit history describes each one.
 **Known limitation, stated plainly:** the rate limiter keeps its counters in
 process memory. That is correct for a prototype on one machine and would need a
 shared store before running several instances.
+
+**Worth knowing if you run other projects on localhost:** browsers scope cookies
+by hostname, not by port, so every app on `localhost` shares one cookie jar
+regardless of which port it listens on. Swop-it's session cookie is named
+`swopit_session` specifically so it cannot collide with another local project's
+session — changing the port is about the port being free, not about isolation.
+If you ever do see two local apps fighting over a session, the cookie name is
+what to check, in `src/lib/auth.ts`.
 
 **A second one:** balance is checked when a Swop is requested and again, under a
 lock, when it settles. There is no escrow in between, so a member can commit to

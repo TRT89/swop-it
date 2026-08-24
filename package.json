@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm run db:setup --silent && next dev",
-    "dev:only": "next dev",
+    "dev": "npm run db:setup --silent && next dev -p 3100",
+    "dev:only": "next dev -p 3100",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3100",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
